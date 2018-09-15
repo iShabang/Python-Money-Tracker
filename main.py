@@ -27,19 +27,19 @@ class AccountGui:
         self.window.grid()
         Grid.columnconfigure(self.window, 0, weight=1)
         Grid.rowconfigure(self.window, 0, weight=1)
-        self.mainFrame = Frame(self.window)
-        self.test_config()
-        self.load_config()
-        self.mainFrame.grid(sticky=W+E)
-        Grid.columnconfigure(self.mainFrame, 0, weight=1)
-        Grid.rowconfigure(self.mainFrame, 0, weight=1)
-        self.home()
+        self.main_frame = Frame(self.window)
+        self.testConfig()
+        self.loadConfig()
+        self.main_frame.grid(sticky=W+E)
+        Grid.columnconfigure(self.main_frame, 0, weight=1)
+        Grid.rowconfigure(self.main_frame, 0, weight=1)
+        self.homeScreen()
 
-    def home(self):
-        self.home_frame = Frame(self.mainFrame)
-        btn1 = Button(self.home_frame, text="Add Income", command=lambda: self.switch_current(True))
-        btn2 = Button(self.home_frame, text="Add Expense", command=lambda: self.switch_current(False))
-        btn3 = Button(self.home_frame, text="Summary", command=lambda: self.summary(self.home_frame))
+    def homeScreen(self):
+        self.home_frame = Frame(self.main_frame)
+        btn1 = Button(self.home_frame, text="Add Income", command=lambda: self.switchCurrentFile(True))
+        btn2 = Button(self.home_frame, text="Add Expense", command=lambda: self.switchCurrentFile(False))
+        btn3 = Button(self.home_frame, text="Summary", command=lambda: self.displaySummary(self.home_frame))
         btn4 = Button(self.home_frame, text="Quit", command = self.window.destroy)
 
         self.home_frame.grid(sticky=N+S+E+W)
@@ -52,7 +52,9 @@ class AccountGui:
         btn4.grid(row=3, column=0, sticky=N+S+E+W)
 
 
-    def switch_current(self, entry_type):
+    #switchCurrentFile simply makes the object point to a different type of input file. This done to eliminate the need
+    #for separate function every time a different type of data is entered.
+    def switchCurrentFile(self, entry_type):
         type_label = StringVar()
         if(entry_type):
             self.current_file = self.income_file
@@ -60,11 +62,11 @@ class AccountGui:
         else:
             self.current_file = self.expense_file
             type_label = "Expense"
-        self.enter_data(type_label)
+        self.enterData(type_label)
         
-    def enter_data(self, type_label):
+    def enterData(self, type_label):
         self.home_frame.destroy()
-        entry_frame = Frame(self.mainFrame)
+        entry_frame = Frame(self.main_frame)
         self.ent1 = Entry(entry_frame)
         self.ent2 = Entry(entry_frame)
         self.ent3 = Entry(entry_frame)
@@ -72,11 +74,11 @@ class AccountGui:
         name_label = Label(entry_frame, text="Name")
         date_label = Label(entry_frame, text="Date")
         title = Label(entry_frame, text=type_label)
-        btn_back = Button(entry_frame, text="Back", command=lambda: self.clear_move(entry_frame))
+        btn_back = Button(entry_frame, text="Back", command=lambda: self.clearMove(entry_frame))
 
-        self.ent1.bind('<Return>',self.add_data)
-        self.ent2.bind('<Return>',self.add_data)
-        self.ent3.bind('<Return>',self.add_data)
+        self.ent1.bind('<Return>',self.addData)
+        self.ent2.bind('<Return>',self.addData)
+        self.ent3.bind('<Return>',self.addData)
 
         entry_frame.grid(row=1, columnspan=2, sticky=N+S+E+W)
         Grid.columnconfigure(entry_frame, 0, weight=1)
@@ -92,7 +94,7 @@ class AccountGui:
 
         self.ent1.focus()
 
-    def add_data(self, event):
+    def addData(self, event):
 
         price = self.ent1.get()
         name = self.ent2.get()
@@ -112,13 +114,13 @@ class AccountGui:
 
         self.ent1.focus()
 
-    def clear_move(self, frame):
+    def clearMove(self, frame):
         frame.destroy()
-        self.home()
+        self.homeScreen()
 
-    def summary(self, del_frame):
+    def displaySummary(self, del_frame):
         del_frame.destroy()
-        summaryframe = Frame(self.mainFrame)
+        summaryframe = Frame(self.main_frame)
         summaryframe.grid(sticky=N+S+E+W)
         Grid.columnconfigure(summaryframe, 0, weight=1)
         Grid.columnconfigure(summaryframe, 1, weight=1)
@@ -129,7 +131,7 @@ class AccountGui:
         total_expense = np.sum(expense_data['Price'])
         total_profit = total_income - total_expense
 
-        btn1 = Button(summaryframe,text="Back",command=lambda:self.clear_move(summaryframe)).grid(row=3,columnspan=2,sticky=W+E)
+        btn1 = Button(summaryframe,text="Back",command=lambda:self.clearMove(summaryframe)).grid(row=3,columnspan=2,sticky=W+E)
 
         label1 = Label(summaryframe, text="Total Income").grid(row=0,column=0,sticky=E)
         label2 = Label(summaryframe, text="Total Expense").grid(row=1,column=0,stick=E)
@@ -138,43 +140,39 @@ class AccountGui:
         label5 = Label(summaryframe, text=str(total_expense)).grid(row=1,column=1,stick=W)
         label6 = Label(summaryframe, text=str(total_profit)).grid(row=2,column=1,stick=W)
 
-    def test_config(self):
-        f = Path('config')
-        if f.is_file() == False:
-            self.create_config()
+    def testConfig(self):
+        config_file = Path('config')
+        if config_file.is_file() == False:
+            self.createConfig()
         
-    def create_config(self):
+    def createConfig(self):
         date = datetime.datetime.now()
-        print(date.year)
-        print(date.month)
         f = open('config', 'w')
-        g = 'data/{}{}_income'.format(months[date.month],date.year)
-        h = 'data/{}{}_expense'.format(months[date.month],date.year)
-        f.write('{}\n{}\n{}'.format(date.month, g, h))
+        income_file_name = 'data/{}{}_income'.format(months[date.month],date.year)
+        expense_file_name = 'data/{}{}_expense'.format(months[date.month],date.year)
+        f.write('{}\n{}\n{}'.format(date.month, income_file_name, expense_file_name))
 
-    def load_config(self):
-        f = open('config', 'r')
-        lines = f.read().splitlines()
-        self.month = lines[0]
-        self.income_file = lines[1]
-        self.expense_file = lines[2]
-
+    def loadConfig(self):
+        config_file = open('config', 'r')
+        settings = config_file.read().splitlines()
+        self.month = settings[0]
+        self.income_file = settings[1]
+        self.expense_file = settings[2]
         try:
             os.mkdir('data')
         except OSError:
             print("Directory already exists")
-
-        g = Path(self.income_file)
-        h = Path(self.expense_file)
-        if g.is_file()==False:
-            self.create_input_file(g)
-        if h.is_file()==False:
-            self.create_input_file(h)
+        income_file_name = Path(self.income_file)
+        expense_file_name = Path(self.expense_file)
+        if not income_file_name.is_file():
+            self.create_input_file(income_file_name)
+        if not expense_file_name.is_file():
+            self.create_input_file(expense_file_name)
 
     def create_input_file(self, filename):
         output_string = "Price,Name,Date\n"
-        f = open(filename, 'w')
-        f.write(output_string)
+        new_input_file = open(filename, 'w')
+        new_input_file.write(output_string)
         
 
 def main():
