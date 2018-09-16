@@ -1,0 +1,67 @@
+The user should select which month to edit
+
+need to know what months are available
+    *generate a file that writes each time a new month file is created
+    *read the file on startup and create a list of months
+need a screen that displays all the available months (buttons)
+    *create a new method and create a new frame
+    *loop through the list and create a button for each month in the list
+clicking a button brings user to the main input screen
+    *each button will call a method to switch the current month
+    *next screen should be homeScreen method
+
+no need for the configuration file since user will select months
+selecting the month will switch the current month
+slecting income/expense will switch the current input type
+
+need to add an input section for bills
+each month this file will be copied over
+user needs an option to edit this file
+    need a way to display the file contents in the window
+    user should be able to add and remove entries easily
+        "x" button to delete
+        "add" button at the bottom to insert a new bill
+
+
+
+initialization
+1. check if config file exists
+    a. if not create config file
+    b. create year list
+    c. create month list
+2. load the config file
+3. call the year screen method
+
+
+year screen
+1. load year list
+    a. if last year is not current, add current year to the file
+2. display years as buttons
+3. user selects year
+4. self.year updated to selection
+5. call the month screen method
+
+
+month screen
+1. load the month list
+    a. check if last month is not current
+    b. check if year is current
+    c. if year is curernt, add current month to end of file
+2. display the months as buttons
+3. user selects month
+4. self.month is updated to selection
+5. call the home screen method
+
+home screen
+1. generate menu
+2. user selecs option
+3. call the specified method
+
+
+input entry 
+1. generate entries
+2. generate back button
+3. user inputs data and hits enter
+
+write entry
+1.open file using type, self.year, self.month 

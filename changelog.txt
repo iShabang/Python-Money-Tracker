@@ -1,0 +1,9 @@
+9/16/2018
+Added features
+    Automatic year checking
+    Automatic month checking
+    new files directory for user csv files
+    new program data directory for program information files
+    loads the program data on startup and gives the user options to select the
+    year and month available. 
+    

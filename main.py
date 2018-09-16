@@ -28,12 +28,16 @@ class AccountGui:
         Grid.columnconfigure(self.window, 0, weight=1)
         Grid.rowconfigure(self.window, 0, weight=1)
         self.main_frame = Frame(self.window)
-        self.testConfig()
+        self.makeDirectories()
+        if not self.testConfig():
+            self.createConfig()
+            self.createTimeList('year')
+            self.createTimeList('month')
         self.loadConfig()
         self.main_frame.grid(sticky=W+E)
         Grid.columnconfigure(self.main_frame, 0, weight=1)
         Grid.rowconfigure(self.main_frame, 0, weight=1)
-        self.homeScreen()
+        self.yearScreen()
 
     def homeScreen(self):
         self.home_frame = Frame(self.main_frame)
@@ -51,16 +55,55 @@ class AccountGui:
         btn3.grid(row=2, column=0, sticky=N+S+E+W)
         btn4.grid(row=3, column=0, sticky=N+S+E+W)
 
+    def yearScreen(self):
+        self.year_frame = Frame(self.main_frame)
+        self.year_frame.grid()
+        Grid.columnconfigure(self.year_frame, 0, weight=1)
+        self.loadYearList()
+        i = 0
+        for year in self.year_list:
+            btn = Button(self.year_frame, text=year, command=lambda: self.yearButtonFunctions(year))
+            btn.grid(row=i, column=0, sticky=N+S+E+W)
+            i = i+1
+
+    def changeCurrentYear(self, year):
+        self.current_year = year
+
+    def yearButtonFunctions(self, year):
+        self.year_frame.destroy()
+        self.changeCurrentYear(year)
+        self.monthScreen()
+
+    def monthScreen(self):
+        self.month_frame = Frame(self.main_frame)
+        self.month_frame.grid()
+        Grid.columnconfigure(self.month_frame, 0, weight=1)
+        self.loadMonthList()
+        i=0
+        for month in self.month_list:
+            btn = Button(self.month_frame, text=month, command=lambda :self.monthButtonFunctions(month))
+            btn.grid(row=i,column=0,sticky=N+S+E+W)
+            i=i+1
+
+    def monthButtonFunctions(self,month):
+        self.month_frame.destroy()
+        self.changeCurrentMonth(month)
+        self.homeScreen()
+
+    def changeCurrentMonth(self,month):
+        self.current_month = month
 
     #switchCurrentFile simply makes the object point to a different type of input file. This done to eliminate the need
     #for separate function every time a different type of data is entered.
     def switchCurrentFile(self, entry_type):
         type_label = StringVar()
         if(entry_type):
-            self.current_file = self.income_file
+            income_file_path = Path('files/{}{}_income.csv'.format(months[int(self.current_month)],self.current_year))
+            self.current_file = income_file_path
             type_label = "Income"
         else:
-            self.current_file = self.expense_file
+            expense_file_path = Path('files/{}{}_expense.csv'.format(months[int(self.current_month)],self.current_year))
+            self.current_file = expense_file_path
             type_label = "Expense"
         self.enterData(type_label)
         
@@ -95,23 +138,21 @@ class AccountGui:
         self.ent1.focus()
 
     def addData(self, event):
-
         price = self.ent1.get()
         name = self.ent2.get()
         date = self.ent3.get()
-
+        
         if date == "":
-            print("Its empty!")
             now = datetime.datetime.now()
             date = "{}/{}/{}".format(now.month,now.day,now.year)
-
+        if not self.current_file.is_file():
+            self.createInputFile(self.current_file)
         f = open(self.current_file,'a')
         f.write('{},{},{}\n'.format(price,name,date))
 
         self.ent1.delete(0, END)
         self.ent2.delete(0, END)
         self.ent3.delete(0, END)
-
         self.ent1.focus()
 
     def clearMove(self, frame):
@@ -140,36 +181,96 @@ class AccountGui:
         label5 = Label(summaryframe, text=str(total_expense)).grid(row=1,column=1,stick=W)
         label6 = Label(summaryframe, text=str(total_profit)).grid(row=2,column=1,stick=W)
 
-    def testConfig(self):
-        config_file = Path('config')
-        if config_file.is_file() == False:
-            self.createConfig()
-        
-    def createConfig(self):
-        date = datetime.datetime.now()
-        f = open('config', 'w')
-        income_file_name = 'data/{}{}_income'.format(months[date.month],date.year)
-        expense_file_name = 'data/{}{}_expense'.format(months[date.month],date.year)
-        f.write('{}\n{}\n{}'.format(date.month, income_file_name, expense_file_name))
+    def addNewMonth(self,year,month):
+        month_file_path = ('Program Data/{}/month'.format(year))
+        month_file = open(month_file_path, 'a')
+        if month:
+            month_file.write(months[month])
+        else:
+            date = datetime.datetime.now()
+            month_file.write(months[date.month])
+            
 
-    def loadConfig(self):
-        config_file = open('config', 'r')
-        settings = config_file.read().splitlines()
-        self.month = settings[0]
-        self.income_file = settings[1]
-        self.expense_file = settings[2]
+    def makeDirectories(self):
+        date = datetime.datetime.now()
+
         try:
-            os.mkdir('data')
+            os.makedirs('Program Data/{}'.format(date.year))
         except OSError:
             print("Directory already exists")
-        income_file_name = Path(self.income_file)
-        expense_file_name = Path(self.expense_file)
-        if not income_file_name.is_file():
-            self.create_input_file(income_file_name)
-        if not expense_file_name.is_file():
-            self.create_input_file(expense_file_name)
 
-    def create_input_file(self, filename):
+        try:
+            os.mkdir('files')
+        except OSError:
+            print("Directory already exists")
+            
+
+    def checkMonth(self):
+        date = datetime.datetime.now()
+        if self.month != date.month:
+            return False
+        else:
+            return True
+
+    def testConfig(self):
+        config_file = Path('config')
+        if not config_file.is_file():
+            return False
+        else:
+            return True
+
+    def createConfig(self):
+        config_file = open('config', 'w')
+        config_file.close()
+
+    def createTimeList(self, time_type):
+        date = datetime.datetime.now()
+        if time_type == 'year':
+            file_path = Path('Program Data/year')
+        elif time_type == 'month':
+            file_path = Path('Program Data/{}/month'.format(date.year))
+
+        if file_path.is_file():
+            print('{} already exists'.format(file_path))
+            return
+
+        time_file = open(file_path, 'w')
+        if time_type == 'year':
+            time_file.write('{}\n'.format(date.year))
+        elif time_type == 'month':
+            time_file.write('{}\n'.format(date.month))
+        time_file.close()
+
+    def loadMonthList(self):
+        date = datetime.datetime.now()
+        month_file = open('Program Data/{}/month'.format(self.current_year), 'r')
+        self.month_list = month_file.read().splitlines()
+        month_file.close()
+        if self.month_list[-1] != str(date.month):
+            month_file = open('Program Data/{}/month'.format(self.current_year), 'w')
+            month_file.write('{}\n'.format(date.month))
+            month_file.cloe()
+            self.month_list.append(str(date.month))
+            
+
+    def loadYearList(self):
+        date = datetime.datetime.now()
+        year_file = open('Program Data/year', 'r')
+        self.year_list = year_file.read().splitlines()
+        year_file.close()
+        if self.year_list[-1] != str(date.year):
+            year_file = open('Program Data/year', 'a')
+            year_file.write('{}\n'.format(date.year))
+            year_file.close()
+            self.year_list.append(str(date.year))
+        
+
+    def loadConfig(self):
+        print("config loaded")
+        #config_file = open('config', 'r')
+        #settings = config_file.read().splitlines()
+
+    def createInputFile(self, filename):
         output_string = "Price,Name,Date\n"
         new_input_file = open(filename, 'w')
         new_input_file.write(output_string)
