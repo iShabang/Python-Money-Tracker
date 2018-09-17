@@ -57,7 +57,7 @@ class AccountGui:
 
     def yearScreen(self):
         self.year_frame = Frame(self.main_frame)
-        self.year_frame.grid()
+        self.year_frame.grid(sticky=N+S+E+W)
         Grid.columnconfigure(self.year_frame, 0, weight=1)
         self.loadYearList()
         i = 0
@@ -65,6 +65,8 @@ class AccountGui:
             btn = Button(self.year_frame, text=year, command=lambda: self.yearButtonFunctions(year))
             btn.grid(row=i, column=0, sticky=N+S+E+W)
             i = i+1
+        quit_button = Button(self.year_frame, text="Quit", command=self.window.destroy)
+        quit_button.grid(row=i, column=0, sticky=N+S+E+W)
 
     def changeCurrentYear(self, year):
         self.current_year = year
@@ -76,14 +78,16 @@ class AccountGui:
 
     def monthScreen(self):
         self.month_frame = Frame(self.main_frame)
-        self.month_frame.grid()
+        self.month_frame.grid(sticky=N+S+E+W)
         Grid.columnconfigure(self.month_frame, 0, weight=1)
         self.loadMonthList()
         i=0
         for month in self.month_list:
-            btn = Button(self.month_frame, text=month, command=lambda :self.monthButtonFunctions(month))
+            btn = Button(self.month_frame, text=months[int(month)], command=lambda :self.monthButtonFunctions(month))
             btn.grid(row=i,column=0,sticky=N+S+E+W)
             i=i+1
+        quit_button = Button(self.month_frame, text="Quit", command=self.window.destroy)
+        quit_button.grid(row=i, column=0, sticky=N+S+E+W)
 
     def monthButtonFunctions(self,month):
         self.month_frame.destroy()
