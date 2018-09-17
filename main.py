@@ -40,6 +40,8 @@ class AccountGui:
         self.yearScreen()
 
     def homeScreen(self):
+        self.current_income_file = "files/{}{}_income.csv".format(months[int(self.current_month)],self.current_year)
+        self.current_expense_file = "files/{}{}_expense.csv".format(months[int(self.current_month)],self.current_year)
         self.home_frame = Frame(self.main_frame)
         btn1 = Button(self.home_frame, text="Add Income", command=lambda: self.switchCurrentFile(True))
         btn2 = Button(self.home_frame, text="Add Expense", command=lambda: self.switchCurrentFile(False))
@@ -170,8 +172,8 @@ class AccountGui:
         Grid.columnconfigure(summaryframe, 0, weight=1)
         Grid.columnconfigure(summaryframe, 1, weight=1)
         Grid.rowconfigure(summaryframe, 0, weight=1)
-        income_data = pd.read_csv(self.income_file)
-        expense_data = pd.read_csv(self.expense_file)
+        income_data = pd.read_csv(self.current_income_file)
+        expense_data = pd.read_csv(self.current_expense_file)
         total_income = np.sum(income_data['Price'])
         total_expense = np.sum(expense_data['Price'])
         total_profit = total_income - total_expense

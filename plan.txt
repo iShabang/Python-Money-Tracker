@@ -22,6 +22,14 @@ user needs an option to edit this file
         "x" button to delete
         "add" button at the bottom to insert a new bill
 
+******************************************
+SUMMARY ISSUE
+******************************************
+Summary relies on opening the self.income_file and self.expense_file
+which were both removed in the last merge. Will need to define these files
+sometime when the user selects the month
+
+
 
 
 initialization
