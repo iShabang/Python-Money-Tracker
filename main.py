@@ -47,6 +47,8 @@ class AccountGui:
         btn2 = Button(self.home_frame, text="Add Expense", command=lambda: self.switchCurrentFile(False))
         btn3 = Button(self.home_frame, text="Summary", command=lambda: self.displaySummary(self.home_frame))
         btn4 = Button(self.home_frame, text="Quit", command = self.window.destroy)
+        btn5 = Button(self.home_frame, text="Display Income", command=lambda: self.displayFileContents(self.current_income_file,self.home_frame))
+        btn6 = Button(self.home_frame, text="Display Expense", command=lambda: self.displayFileContents(self.current_expense_file,self.home_frame))
 
         self.home_frame.grid(sticky=N+S+E+W)
         Grid.rowconfigure(self.home_frame, 0, weight=1)
@@ -55,7 +57,9 @@ class AccountGui:
         btn1.grid(row=0, column=0, sticky=N+S+E+W)
         btn2.grid(row=1, column=0, sticky=N+S+E+W)
         btn3.grid(row=2, column=0, sticky=N+S+E+W)
-        btn4.grid(row=3, column=0, sticky=N+S+E+W)
+        btn4.grid(row=5, column=0, sticky=N+S+E+W)
+        btn5.grid(row=3, column=0, sticky=N+S+E+W)
+        btn6.grid(row=4, column=0, sticky=N+S+E+W)
 
     def yearScreen(self):
         self.year_frame = Frame(self.main_frame)
@@ -98,6 +102,9 @@ class AccountGui:
 
     def changeCurrentMonth(self,month):
         self.current_month = month
+
+    #def setFiles(self,month):
+    #    self.current_income_file = 
 
     #switchCurrentFile simply makes the object point to a different type of input file. This done to eliminate the need
     #for separate function every time a different type of data is entered.
@@ -167,25 +174,43 @@ class AccountGui:
 
     def displaySummary(self, del_frame):
         del_frame.destroy()
-        summaryframe = Frame(self.main_frame)
-        summaryframe.grid(sticky=N+S+E+W)
-        Grid.columnconfigure(summaryframe, 0, weight=1)
-        Grid.columnconfigure(summaryframe, 1, weight=1)
-        Grid.rowconfigure(summaryframe, 0, weight=1)
-        income_data = pd.read_csv(self.current_income_file)
-        expense_data = pd.read_csv(self.current_expense_file)
-        total_income = np.sum(income_data['Price'])
-        total_expense = np.sum(expense_data['Price'])
+        summary_frame = Frame(self.main_frame)
+        summary_frame.grid(sticky=N+S+E+W)
+        Grid.columnconfigure(summary_frame, 0, weight=1)
+        Grid.columnconfigure(summary_frame, 1, weight=1)
+        Grid.rowconfigure(summary_frame, 0, weight=1)
+        total_income = 0
+        total_expense = 0
+        total_profit = 0
+        try:
+            income_data = pd.read_csv(self.current_income_file)
+            expense_data = pd.read_csv(self.current_expense_file)
+            total_income = np.sum(income_data['Price'])
+            total_expense = np.sum(expense_data['Price'])
+        except OSError:
+            print("File does not exist")
+
         total_profit = total_income - total_expense
+        btn1 = Button(summary_frame,text="Back",command=lambda:self.clearMove(summary_frame)).grid(row=3,columnspan=2,sticky=W+E)
 
-        btn1 = Button(summaryframe,text="Back",command=lambda:self.clearMove(summaryframe)).grid(row=3,columnspan=2,sticky=W+E)
+        label1 = Label(summary_frame, text="Total Income").grid(row=0,column=0,sticky=E)
+        label2 = Label(summary_frame, text="Total Expense").grid(row=1,column=0,stick=E)
+        label3 = Label(summary_frame, text="Total Profit").grid(row=2,column=0,stick=E)
+        label4 = Label(summary_frame, text=str(total_income)).grid(row=0,column=1,stick=W)
+        label5 = Label(summary_frame, text=str(total_expense)).grid(row=1,column=1,stick=W)
+        label6 = Label(summary_frame, text=str(total_profit)).grid(row=2,column=1,stick=W)
 
-        label1 = Label(summaryframe, text="Total Income").grid(row=0,column=0,sticky=E)
-        label2 = Label(summaryframe, text="Total Expense").grid(row=1,column=0,stick=E)
-        label3 = Label(summaryframe, text="Total Profit").grid(row=2,column=0,stick=E)
-        label4 = Label(summaryframe, text=str(total_income)).grid(row=0,column=1,stick=W)
-        label5 = Label(summaryframe, text=str(total_expense)).grid(row=1,column=1,stick=W)
-        label6 = Label(summaryframe, text=str(total_profit)).grid(row=2,column=1,stick=W)
+    def displayFileContents(self, filename, del_frame):
+        del_frame.destroy()
+        data = pd.read_csv(filename)
+        display_frame = Frame(self.main_frame)
+        display_frame.grid(sticky=N+S+E+W)
+        Grid.columnconfigure(display_frame, 0, weight=1)
+        text = Text(display_frame)
+        text.insert(END, data)
+        text.grid(sticky=N+S+E+W)
+        back_button = Button(display_frame,text="Back",command=lambda:self.clearMove(display_frame))
+        back_button.grid(row=2,sticky=N+S+E+W)
 
     def addNewMonth(self,year,month):
         month_file_path = ('Program Data/{}/month'.format(year))
@@ -195,6 +220,13 @@ class AccountGui:
         else:
             date = datetime.datetime.now()
             month_file.write(months[date.month])
+    
+    def fileTest(self, filename):
+        test_file = Path(filename)
+        if test_file.is_file():
+            return True
+        else:
+            return False
             
 
     def makeDirectories(self):
