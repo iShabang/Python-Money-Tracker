@@ -24,27 +24,27 @@ months = {
 class AccountGui:
     def __init__(self, window):
         self.window = window
-        self.window.grid()
-        Grid.columnconfigure(self.window, 0, weight=1)
-        Grid.rowconfigure(self.window, 0, weight=1)
         self.main_frame = Frame(self.window)
+        Grid.columnconfigure(self.window, 0, weight=1)
+        Grid.columnconfigure(self.main_frame, 0, weight=1)
+        Grid.rowconfigure(self.window, 0, weight=1)
+        Grid.rowconfigure(self.main_frame, 0, weight=1)
+        self.main_frame.grid(sticky=W+E)
+        self.window.grid()
         self.makeDirectories()
         if not self.testConfig():
             self.createConfig()
             self.createTimeList('year')
             self.createTimeList('month')
         self.loadConfig()
-        self.main_frame.grid(sticky=W+E)
-        Grid.columnconfigure(self.main_frame, 0, weight=1)
-        Grid.rowconfigure(self.main_frame, 0, weight=1)
         self.yearScreen()
 
     def homeScreen(self):
-        self.current_income_file = "files/{}{}_income.csv".format(months[int(self.current_month)],self.current_year)
-        self.current_expense_file = "files/{}{}_expense.csv".format(months[int(self.current_month)],self.current_year)
+        self.current_income_file = Path("files/{}{}_income.csv".format(months[int(self.current_month)],self.current_year))
+        self.current_expense_file = Path("files/{}{}_expense.csv".format(months[int(self.current_month)],self.current_year))
         self.home_frame = Frame(self.main_frame)
-        btn1 = Button(self.home_frame, text="Add Income", command=lambda: self.switchCurrentFile(True))
-        btn2 = Button(self.home_frame, text="Add Expense", command=lambda: self.switchCurrentFile(False))
+        btn1 = Button(self.home_frame, text="Add Income", command=lambda: self.switchCurrentFile("Income"))
+        btn2 = Button(self.home_frame, text="Add Expense", command=lambda: self.switchCurrentFile("Expense"))
         btn3 = Button(self.home_frame, text="Summary", command=lambda: self.displaySummary(self.home_frame))
         btn4 = Button(self.home_frame, text="Quit", command = self.window.destroy)
         btn5 = Button(self.home_frame, text="Display Income", command=lambda: self.displayFileContents(self.current_income_file,self.home_frame))
@@ -103,22 +103,12 @@ class AccountGui:
     def changeCurrentMonth(self,month):
         self.current_month = month
 
-    #def setFiles(self,month):
-    #    self.current_income_file = 
-
-    #switchCurrentFile simply makes the object point to a different type of input file. This done to eliminate the need
-    #for separate function every time a different type of data is entered.
     def switchCurrentFile(self, entry_type):
-        type_label = StringVar()
-        if(entry_type):
-            income_file_path = Path('files/{}{}_income.csv'.format(months[int(self.current_month)],self.current_year))
-            self.current_file = income_file_path
-            type_label = "Income"
-        else:
-            expense_file_path = Path('files/{}{}_expense.csv'.format(months[int(self.current_month)],self.current_year))
-            self.current_file = expense_file_path
-            type_label = "Expense"
-        self.enterData(type_label)
+        if(entry_type=="Income"):
+            self.current_file = self.current_income_file
+        elif(entry_type=="Expense"):
+            self.current_file = self.current_expense_file
+        self.enterData(entry_type)
         
     def enterData(self, type_label):
         self.home_frame.destroy()
