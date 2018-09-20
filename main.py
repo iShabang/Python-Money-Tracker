@@ -206,7 +206,8 @@ class AccountGui:
         display_frame = Frame(self.main_frame)
         display_frame.grid(sticky=N+S+E+W)
         Grid.columnconfigure(display_frame, 0, weight=1)
-        text = Text(display_frame, height=10, width=50)
+        text = Text(display_frame, height=10)
+        #text = Text(display_frame)
         text.insert(END, data)
         text.grid(sticky=N+S+E+W)
         back_button = Button(display_frame,text="Back",command=lambda:self.clearMove(display_frame))
@@ -316,7 +317,7 @@ class AccountGui:
 
 def main():
     root = Tk()
-    #root.geometry('500x400')
+    root.geometry('220x205')
     a = AccountGui(root)
     root.mainloop()
 
