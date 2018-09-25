@@ -23,11 +23,18 @@ user needs an option to edit this file
         "add" button at the bottom to insert a new bill
 
 ******************************************
-SUMMARY ISSUE
+SUMMARY ISSUE ##SOLVED##
 ******************************************
 Summary relies on opening the self.income_file and self.expense_file
 which were both removed in the last merge. Will need to define these files
 sometime when the user selects the month
+
+******************************************
+MAIN BACK BUTTON
+******************************************
+Once the year and month are selected, there is no way to go back to the 
+year/month selection screens. Need to create some way of moving backwards
+from this area. 
 
 
 

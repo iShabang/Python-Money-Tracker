@@ -7,3 +7,10 @@ Added features
     loads the program data on startup and gives the user options to select the
     year and month available. 
     
+9/24/2018
+Took out print statements and replaced them with logging
+"log.txt" is created and stores all logging messages
+Fixed a bug with the month buttons. Each button was passing the current month instead of
+the one the button represented. Adjusted the lambda expression to take the current instance of 
+the variable "month" when creating the buttons
+Init method now attempts to create the year and month lists. No longer dependant on the config file

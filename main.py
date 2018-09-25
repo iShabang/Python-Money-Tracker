@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import datetime
 import os
+import logging
 
 months = {
     1: 'January',
@@ -34,8 +35,8 @@ class AccountGui:
         self.makeDirectories()
         if not self.testConfig():
             self.createConfig()
-            self.createTimeList('year')
-            self.createTimeList('month')
+        self.createTimeList('year')
+        self.createTimeList('month')
         self.loadConfig()
         self.yearScreen()
 
@@ -89,7 +90,7 @@ class AccountGui:
         self.loadMonthList()
         i=0
         for month in self.month_list:
-            btn = Button(self.month_frame, text=months[int(month)], command=lambda :self.monthButtonFunctions(month))
+            btn = Button(self.month_frame, text=months[int(month)], command=lambda month=month:self.monthButtonFunctions(month))
             btn.grid(row=i,column=0,sticky=N+S+E+W)
             i=i+1
         quit_button = Button(self.month_frame, text="Quit", command=self.window.destroy)
@@ -178,7 +179,7 @@ class AccountGui:
             total_income = np.sum(income_data['Price'])
             total_expense = np.sum(expense_data['Price'])
         except OSError:
-            print("File does not exist")
+            logging.error("No data found for {} {}".format(months[self.current_month], self.current_year))
 
         total_profit = total_income - total_expense
         btn1 = Button(summary_frame,text="Back",command=lambda:self.clearMove(summary_frame)).grid(row=3,columnspan=2,sticky=W+E)
@@ -208,9 +209,12 @@ class AccountGui:
         month_file = open(month_file_path, 'a')
         if month:
             month_file.write(months[month])
+            logging.debug('Added new month {}, to {}'.format(months[month],month_file_path))
         else:
             date = datetime.datetime.now()
             month_file.write(months[date.month])
+            logging.debug('Added new month {}, to {}'.format(months[date.month],month_file_path))
+        month_file.close()
     
     def fileTest(self, filename):
         test_file = Path(filename)
@@ -218,21 +222,21 @@ class AccountGui:
             return True
         else:
             return False
-            
 
     def makeDirectories(self):
         date = datetime.datetime.now()
 
         try:
-            os.makedirs('Program Data/{}'.format(date.year))
+            path1 = Path('Program Data/{}'.format(date.year))
+            os.makedirs(path1)
         except OSError:
-            print("Directory already exists")
+            logging.info('Tried to create "{}", but directory already exists'.format(path1))
 
         try:
-            os.mkdir('files')
+            path2 = Path('files')
+            os.mkdir(path2)
         except OSError:
-            print("Directory already exists")
-            
+            logging.info('Tried to create "{}", but directory already exists'.format(path2))
 
     def checkMonth(self):
         date = datetime.datetime.now()
@@ -251,6 +255,7 @@ class AccountGui:
     def createConfig(self):
         config_file = open('config', 'w')
         config_file.close()
+        logging.info('New config file created')
 
     def createTimeList(self, time_type):
         date = datetime.datetime.now()
@@ -260,7 +265,7 @@ class AccountGui:
             file_path = Path('Program Data/{}/month'.format(date.year))
 
         if file_path.is_file():
-            print('{} already exists'.format(file_path))
+            logging.info('Tried to create "{}" but it already exists'.format(file_path))
             return
 
         time_file = open(file_path, 'w')
@@ -269,17 +274,20 @@ class AccountGui:
         elif time_type == 'month':
             time_file.write('{}\n'.format(date.month))
         time_file.close()
+        logging.debug('Created new {} list'.format(time_type))
 
     def loadMonthList(self):
         date = datetime.datetime.now()
         month_file = open('Program Data/{}/month'.format(self.current_year), 'r')
         self.month_list = month_file.read().splitlines()
         month_file.close()
+        logging.debug('Month list loaded')
         if self.month_list[-1] != str(date.month):
-            month_file = open('Program Data/{}/month'.format(self.current_year), 'w')
+            month_file = open('Program Data/{}/month'.format(self.current_year), 'a')
             month_file.write('{}\n'.format(date.month))
-            month_file.cloe()
+            month_file.close()
             self.month_list.append(str(date.month))
+            logging.debug('Created new month {}'.format(months[date.month]))
             
 
     def loadYearList(self):
@@ -287,15 +295,17 @@ class AccountGui:
         year_file = open('Program Data/year', 'r')
         self.year_list = year_file.read().splitlines()
         year_file.close()
+        logging.debug('Year list loaded')
         if self.year_list[-1] != str(date.year):
             year_file = open('Program Data/year', 'a')
             year_file.write('{}\n'.format(date.year))
             year_file.close()
             self.year_list.append(str(date.year))
+            logging.debug('Created new year {}'.format(months[date.year]))
         
 
     def loadConfig(self):
-        print("config loaded")
+        logging.debug('Config file loaded')
         #config_file = open('config', 'r')
         #settings = config_file.read().splitlines()
 
@@ -303,9 +313,11 @@ class AccountGui:
         output_string = "Price,Name,Date\n"
         new_input_file = open(filename, 'w')
         new_input_file.write(output_string)
+        logging.info('New input file "{}" created'.format(filename))
         
 
 def main():
+    logging.basicConfig(filename='log.txt', level=logging.DEBUG)
     root = Tk()
     root.geometry('220x205')
     a = AccountGui(root)
