@@ -1,2 +1,2 @@
-# python-money-tracker
-Lightweight accounting software
+# Python Money Tracker
+Lightweight accounting software to keep tabs on your spending
